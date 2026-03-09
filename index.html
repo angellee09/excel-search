@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>教師獎補助查詢系統 v9.1</title>
+<title>教師獎補助查詢系統 v9.2</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -21,7 +21,7 @@ button.secondary{background:#6c7a89}
 button.ghost{background:#eef4ff;color:#1d4ea7}
 .notice{margin:6px 0;font-size:15px;font-weight:700;color:#1a3d7a}
 .desc{font-size:13px;color:#4b5b6b}
-.status{margin-top:10px;padding:9px 12px;border-radius:8px;background:#f8fbff;border:1px solid #d7e4ff;color:#153d7a;font-size:13px}
+.status{margin-top:10px;padding:9px 12px;border-radius:8px;background:#f8fbff;border:1px solid #d7e4ff;color:#153d7a;font-size:13px;display:none}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .stat{background:#edf3ff;border:1px solid #d7e4ff;border-radius:10px;padding:12px}
 .stat .k{font-size:12px;color:#5c6b7a}
@@ -38,7 +38,6 @@ button.ghost{background:#eef4ff;color:#1d4ea7}
 .pagination{margin-top:10px;text-align:center}
 .pagination button{margin:2px;background:#eef4ff;color:#1d4ea7}
 .upload-area{display:none;margin-top:10px;padding:12px;border:1px dashed #9db7e6;border-radius:8px;background:#f8fbff}
-.small{font-size:12px;color:#607085}
 .col1{width:6%}.col2{width:8%}.col3{width:12%}.col4{width:16%}.col5{width:18%}.col6{width:10%}.col7{width:12%}.col8{width:18%}
 @media (max-width:1100px){.controls{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:700px){.controls{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:1fr}}
@@ -67,7 +66,7 @@ button.ghost{background:#eef4ff;color:#1d4ea7}
 
     <div class="notice">※ 統計項目暫不包含「教師參加國內研習」</div>
     <div class="desc">查詢結果中，「年度經費小計」僅於同一教師同一年度的第一筆顯示；達 400,000 以上會以紅字標示。</div>
-    <div class="status" id="status">系統啟動中…</div>
+    <div class="status" id="status"></div>
 
     <div class="upload-area" id="uploadArea">
       <div style="font-weight:700;margin-bottom:6px">請選擇 Excel 資料表</div>
@@ -90,14 +89,8 @@ button.ghost{background:#eef4ff;color:#1d4ea7}
         </colgroup>
         <thead>
           <tr>
-            <th>序號</th>
-            <th>年度</th>
-            <th>教師姓名</th>
-            <th>單位</th>
-            <th>獎補助項目</th>
-            <th>核定經費</th>
-            <th>年度經費小計</th>
-            <th>備註</th>
+            <th>序號</th><th>年度</th><th>教師姓名</th><th>單位</th>
+            <th>獎補助項目</th><th>核定經費</th><th>年度經費小計</th><th>備註</th>
           </tr>
         </thead>
       </table>
@@ -144,10 +137,12 @@ const resultTableEl = document.getElementById("resultTable");
 
 function fmt(n){ return Number(n||0).toLocaleString("zh-TW"); }
 function txt(v){ return (v ?? "").toString().trim(); }
-function setStatus(msg){ statusEl.textContent = msg; }
+function setStatus(msg){
+  statusEl.textContent = msg || "";
+  statusEl.style.display = msg ? "block" : "none";
+}
 
 function syncHeaderWidth(){
-  // 以資料表的實際寬度同步表頭，並補償垂直捲軸寬度
   const scrollbarWidth = bodyWrapEl.offsetWidth - bodyWrapEl.clientWidth;
   headerWrapEl.style.paddingRight = scrollbarWidth + "px";
   headerTableEl.style.width = resultTableEl.getBoundingClientRect().width + "px";
@@ -166,7 +161,7 @@ function normalize(rows){
 
 async function loadServer(){
   try{
-    setStatus("正在讀取網站資料…");
+    setStatus("");
     const res = await fetch("data.xlsx?v=" + Date.now(), {cache:"no-store"});
     if(!res.ok) throw new Error("load failed");
     const buf = await res.arrayBuffer();
@@ -176,10 +171,9 @@ async function loadServer(){
     buildCaches();
     initDropdowns();
     search();
-    setStatus("已讀取網站上的 data.xlsx，共 " + rawData.length + " 筆。");
     uploadAreaEl.style.display = "none";
   }catch(e){
-    setStatus("若要本機測試，請按「重新載入資料」並選擇 Excel。");
+    setStatus("");
   }
 }
 
@@ -322,7 +316,7 @@ filePickerEl.addEventListener("change", function(){
     buildCaches();
     initDropdowns();
     search();
-    setStatus("已從您選擇的 Excel 載入資料，共 " + rawData.length + " 筆。");
+    setStatus("");
     uploadAreaEl.style.display = "none";
   };
   reader.readAsArrayBuffer(f);
