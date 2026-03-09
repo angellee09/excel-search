@@ -3,31 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>教師獎補助查詢系統 v8.5.5 </title>
+<title>教師獎補助查詢系統 v9.1</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <style>
-body{font-family:Arial,"Microsoft JhengHei",sans-serif;margin:0;background:#f4f6fb}
+body{font-family:Arial,"Microsoft JhengHei",sans-serif;margin:0;background:#f4f6fb;color:#243447}
 .wrap{max-width:1400px;margin:auto;padding:20px}
-h1{color:#123a75;margin-bottom:14px}
-.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:10px}
+h1{color:#123a75;margin:0 0 14px}
+.panel{background:#fff;border:1px solid #d9e2ef;border-radius:10px;padding:14px;margin-bottom:12px}
+.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .controls input,.controls select{padding:8px;border:1px solid #cfd9e8;border-radius:6px;width:100%;box-sizing:border-box}
-.btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-button{padding:8px 14px;border:none;border-radius:6px;background:#2c6ed5;color:white;cursor:pointer}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{padding:8px 14px;border:none;border-radius:6px;background:#2c6ed5;color:#fff;cursor:pointer}
 button.secondary{background:#6c7a89}
 button.ghost{background:#eef4ff;color:#1d4ea7}
-.notice{margin:6px 0 6px;font-size:15px;font-weight:700;color:#1a3d7a}
-.desc{font-size:13px;color:#4b5b6b;margin-bottom:10px}
+.notice{margin:6px 0;font-size:15px;font-weight:700;color:#1a3d7a}
+.desc{font-size:13px;color:#4b5b6b}
+.status{margin-top:10px;padding:9px 12px;border-radius:8px;background:#f8fbff;border:1px solid #d7e4ff;color:#153d7a;font-size:13px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .stat{background:#edf3ff;border:1px solid #d7e4ff;border-radius:10px;padding:12px}
 .stat .k{font-size:12px;color:#5c6b7a}
 .stat .v{font-size:24px;font-weight:700;color:#153d7a;margin-top:4px}
-.table-shell{border:1px solid #d9e2ef;background:white}
+.table-shell{border:1px solid #d9e2ef;background:#fff;border-radius:10px;overflow:hidden}
+.header-wrap{overflow:hidden}
+.body-wrap{max-height:520px;overflow-y:auto;overflow-x:hidden}
 .header-table,.body-table{width:100%;border-collapse:collapse;table-layout:fixed}
 .header-table th{background:#e8f0ff;color:#143a74;border:1px solid #d9e2ef;padding:12px 6px;font-size:13px;text-align:center;vertical-align:middle}
-.body-wrap{max-height:520px;overflow:auto}
 .body-table td{border:1px solid #d9e2ef;padding:6px;font-size:13px;text-align:center;vertical-align:middle;background:#fff}
 .body-table td.note{white-space:normal;text-align:left}
 .body-table td.project{white-space:normal}
@@ -35,230 +38,336 @@ button.ghost{background:#eef4ff;color:#1d4ea7}
 .pagination{margin-top:10px;text-align:center}
 .pagination button{margin:2px;background:#eef4ff;color:#1d4ea7}
 .upload-area{display:none;margin-top:10px;padding:12px;border:1px dashed #9db7e6;border-radius:8px;background:#f8fbff}
-.c1{width:7%}.c2{width:8%}.c3{width:11%}.c4{width:16%}.c5{width:16%}.c6{width:10%}.c7{width:12%}.c8{width:20%}
+.small{font-size:12px;color:#607085}
+.col1{width:6%}.col2{width:8%}.col3{width:12%}.col4{width:16%}.col5{width:18%}.col6{width:10%}.col7{width:12%}.col8{width:18%}
 @media (max-width:1100px){.controls{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:700px){.controls{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>教師獎補助查詢系統</h1>
+  <h1>教師獎補助查詢系統</h1>
 
-<div class="controls">
-<select id="year"><option value="">全部年度</option></select>
-<input id="teacher" list="teacherList" placeholder="教師姓名（可模糊搜尋）">
-<datalist id="teacherList"></datalist>
-<select id="unit"><option value="">全部單位</option></select>
-<input id="project" placeholder="獎補助項目">
-<input id="keyword" placeholder="關鍵字">
-</div>
+  <div class="panel">
+    <div class="controls">
+      <select id="year"><option value="">全部年度</option></select>
+      <input id="teacher" list="teacherList" placeholder="教師姓名（可模糊搜尋）">
+      <datalist id="teacherList"></datalist>
+      <select id="unit"><option value="">全部單位</option></select>
+      <input id="project" placeholder="獎補助項目">
+      <input id="keyword" placeholder="關鍵字">
+    </div>
 
-<div class="btns">
-<button onclick="search()">查詢</button>
-<button class="secondary" onclick="resetSearch()">清除條件</button>
-<button class="ghost" onclick="exportExcel()">匯出 Excel</button>
-<button class="ghost" onclick="reloadData()">重新載入資料</button>
-</div>
+    <div class="btns">
+      <button onclick="search()">查詢</button>
+      <button class="secondary" onclick="resetSearch()">清除條件</button>
+      <button class="ghost" onclick="exportExcel()">匯出 Excel</button>
+      <button class="ghost" onclick="reloadData()">重新載入資料</button>
+    </div>
 
-<div class="notice">※ 統計項目暫不包含「教師參加國內研習」</div>
-<div class="desc">查詢結果中，「年度經費小計」僅於同一教師同一年度的第一筆顯示；達 400,000 以上會以紅字標示。</div>
+    <div class="notice">※ 統計項目暫不包含「教師參加國內研習」</div>
+    <div class="desc">查詢結果中，「年度經費小計」僅於同一教師同一年度的第一筆顯示；達 400,000 以上會以紅字標示。</div>
+    <div class="status" id="status">系統啟動中…</div>
 
-<div class="upload-area" id="uploadArea">
-  <div style="font-weight:700;margin-bottom:6px">請選擇 Excel 資料表</div>
-  <input type="file" id="filePicker" accept=".xlsx">
-</div>
-
-<div class="stats">
-<div class="stat"><div class="k">查詢筆數</div><div class="v" id="count">0</div></div>
-<div class="stat"><div class="k">核定經費總計</div><div class="v" id="sum">0</div></div>
-<div class="stat"><div class="k">超過 400000 之教師年度組數</div><div class="v" id="warnCount">0</div></div>
-</div>
-
-<div class="table-shell">
-  <table class="header-table">
-    <thead>
-      <tr>
-        <th class="c1">序號</th>
-        <th class="c2">年度</th>
-        <th class="c3">教師姓名</th>
-        <th class="c4">單位</th>
-        <th class="c5">獎補助項目</th>
-        <th class="c6">核定經費</th>
-        <th class="c7">年度經費小計</th>
-        <th class="c8">備註</th>
-      </tr>
-    </thead>
-  </table>
-  <div class="body-wrap">
-    <table class="body-table" id="resultTable">
-      <tbody></tbody>
-    </table>
+    <div class="upload-area" id="uploadArea">
+      <div style="font-weight:700;margin-bottom:6px">請選擇 Excel 資料表</div>
+      <input type="file" id="filePicker" accept=".xlsx">
+    </div>
   </div>
-</div>
 
-<div class="pagination" id="pagination"></div>
+  <div class="stats">
+    <div class="stat"><div class="k">查詢筆數</div><div class="v" id="count">0</div></div>
+    <div class="stat"><div class="k">核定經費總計</div><div class="v" id="sum">0</div></div>
+    <div class="stat"><div class="k">超過 400,000 之教師年度組數</div><div class="v" id="warnCount">0</div></div>
+  </div>
+
+  <div class="table-shell">
+    <div class="header-wrap" id="headerWrap">
+      <table class="header-table" id="headerTable">
+        <colgroup>
+          <col class="col1"><col class="col2"><col class="col3"><col class="col4">
+          <col class="col5"><col class="col6"><col class="col7"><col class="col8">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>序號</th>
+            <th>年度</th>
+            <th>教師姓名</th>
+            <th>單位</th>
+            <th>獎補助項目</th>
+            <th>核定經費</th>
+            <th>年度經費小計</th>
+            <th>備註</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="body-wrap" id="bodyWrap">
+      <table class="body-table" id="resultTable">
+        <colgroup>
+          <col class="col1"><col class="col2"><col class="col3"><col class="col4">
+          <col class="col5"><col class="col6"><col class="col7"><col class="col8">
+        </colgroup>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="pagination" id="pagination"></div>
 </div>
 
 <script>
-let rawData=[]
-let filtered=[]
-let pageSize=20
-let currentPage=1
-const PASSWORD="admin123"
+let rawData = [];
+let filtered = [];
+let pageSize = 20;
+let currentPage = 1;
+const PASSWORD = "admin123";
 
-function fmt(n){return Number(n||0).toLocaleString("zh-TW")}
-function normalize(rows){
-  return rows.map(r=>({
-    年度:(r["年度"]||"").toString(),
-    教師姓名:(r["教師姓名"]||"").toString(),
-    單位:(r["單位"]||"").toString(),
-    獎補助項目:(r["獎補助項目"]||"").toString(),
-    核定經費:Number(r["核定經費"]||0),
-    備註:(r["備註"]||"").toString()
-  }))
+const yearEl = document.getElementById("year");
+const teacherEl = document.getElementById("teacher");
+const unitEl = document.getElementById("unit");
+const projectEl = document.getElementById("project");
+const keywordEl = document.getElementById("keyword");
+const teacherListEl = document.getElementById("teacherList");
+const countEl = document.getElementById("count");
+const sumEl = document.getElementById("sum");
+const warnCountEl = document.getElementById("warnCount");
+const paginationEl = document.getElementById("pagination");
+const tbodyEl = document.querySelector("#resultTable tbody");
+const statusEl = document.getElementById("status");
+const uploadAreaEl = document.getElementById("uploadArea");
+const filePickerEl = document.getElementById("filePicker");
+const bodyWrapEl = document.getElementById("bodyWrap");
+const headerWrapEl = document.getElementById("headerWrap");
+const headerTableEl = document.getElementById("headerTable");
+const resultTableEl = document.getElementById("resultTable");
+
+function fmt(n){ return Number(n||0).toLocaleString("zh-TW"); }
+function txt(v){ return (v ?? "").toString().trim(); }
+function setStatus(msg){ statusEl.textContent = msg; }
+
+function syncHeaderWidth(){
+  // 以資料表的實際寬度同步表頭，並補償垂直捲軸寬度
+  const scrollbarWidth = bodyWrapEl.offsetWidth - bodyWrapEl.clientWidth;
+  headerWrapEl.style.paddingRight = scrollbarWidth + "px";
+  headerTableEl.style.width = resultTableEl.getBoundingClientRect().width + "px";
 }
+
+function normalize(rows){
+  return rows.map(r => ({
+    年度: txt(r["年度"]),
+    教師姓名: txt(r["教師姓名"]),
+    單位: txt(r["單位"]),
+    獎補助項目: txt(r["獎補助項目"]),
+    核定經費: Number(r["核定經費"] || 0),
+    備註: txt(r["備註"])
+  }));
+}
+
 async function loadServer(){
   try{
-    const res=await fetch("data.xlsx?v="+Date.now(), {cache:"no-store"})
-    if(!res.ok) throw new Error("load failed")
-    const buf=await res.arrayBuffer()
-    const wb=XLSX.read(buf,{type:"array"})
-    const sh=wb.Sheets["資料表"]||wb.Sheets[wb.SheetNames[0]]
-    rawData=normalize(XLSX.utils.sheet_to_json(sh))
-    initDropdowns()
-    search()
-  }catch(e){}
-}
-function reloadData(){
-  let p=prompt("請輸入重新載入資料密碼")
-  if(p!==PASSWORD){alert("密碼錯誤");return}
-  document.getElementById("uploadArea").style.display="block"
-}
-document.addEventListener("change",function(e){
-  if(e.target.id==="filePicker"){
-    let f=e.target.files[0]
-    if(!f) return
-    let reader=new FileReader()
-    reader.onload=function(ev){
-      let wb=XLSX.read(new Uint8Array(ev.target.result),{type:"array"})
-      let sh=wb.Sheets["資料表"]||wb.Sheets[wb.SheetNames[0]]
-      rawData=normalize(XLSX.utils.sheet_to_json(sh))
-      initDropdowns()
-      search()
-    }
-    reader.readAsArrayBuffer(f)
+    setStatus("正在讀取網站資料…");
+    const res = await fetch("data.xlsx?v=" + Date.now(), {cache:"no-store"});
+    if(!res.ok) throw new Error("load failed");
+    const buf = await res.arrayBuffer();
+    const wb = XLSX.read(buf,{type:"array"});
+    const sh = wb.Sheets["資料表"] || wb.Sheets[wb.SheetNames[0]];
+    rawData = normalize(XLSX.utils.sheet_to_json(sh,{defval:""}));
+    buildCaches();
+    initDropdowns();
+    search();
+    setStatus("已讀取網站上的 data.xlsx，共 " + rawData.length + " 筆。");
+    uploadAreaEl.style.display = "none";
+  }catch(e){
+    setStatus("若要本機測試，請按「重新載入資料」並選擇 Excel。");
   }
-})
+}
+
+function buildCaches(){
+  const names = [...new Set(rawData.map(r => r.教師姓名).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+  teacherListEl.innerHTML = names.map(n => `<option value="${n}"></option>`).join("");
+}
+
 function initDropdowns(){
-  let years=[...new Set(rawData.map(r=>r.年度))].sort((a,b)=>Number(b)-Number(a))
-  let units=[...new Set(rawData.map(r=>r.單位))]
-  document.getElementById("year").innerHTML='<option value="">全部年度</option>'+years.map(v=>'<option>'+v+'</option>').join("")
-  document.getElementById("unit").innerHTML='<option value="">全部單位</option>'+units.map(v=>'<option>'+v+'</option>').join("")
-  let names=[...new Set(rawData.map(r=>r.教師姓名))]
-  document.getElementById("teacherList").innerHTML=names.map(n=>`<option value="${n}"></option>`).join("")
+  const years = [...new Set(rawData.map(r=>r.年度).filter(Boolean))].sort((a,b)=>Number(b)-Number(a));
+  const units = [...new Set(rawData.map(r=>r.單位).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+  const curYear = yearEl.value;
+  const curUnit = unitEl.value;
+  yearEl.innerHTML = '<option value="">全部年度</option>' + years.map(v=>`<option value="${v}">${v}</option>`).join("");
+  unitEl.innerHTML = '<option value="">全部單位</option>' + units.map(v=>`<option value="${v}">${v}</option>`).join("");
+  if(years.includes(curYear)) yearEl.value = curYear;
+  if(units.includes(curUnit)) unitEl.value = curUnit;
 }
-function fuzzyMatch(t,k){return t.toLowerCase().includes(k.toLowerCase())}
+
+function fuzzyMatch(t,k){ return t.toLowerCase().includes(k.toLowerCase()); }
+
 function search(){
-  let year=document.getElementById("year").value
-  let teacher=document.getElementById("teacher").value
-  let unit=document.getElementById("unit").value
-  let project=document.getElementById("project").value
-  let keyword=document.getElementById("keyword").value
-  filtered=rawData.filter(r=>
-    (!year||r.年度==year)&&
-    (!teacher||fuzzyMatch(r.教師姓名,teacher))&&
-    (!unit||r.單位==unit)&&
-    (!project||fuzzyMatch(r.獎補助項目,project))&&
-    (!keyword||JSON.stringify(r).includes(keyword))
-  )
-  currentPage=1
-  render()
+  const year = yearEl.value;
+  const teacher = txt(teacherEl.value);
+  const unit = unitEl.value;
+  const project = txt(projectEl.value);
+  const keyword = txt(keywordEl.value);
+
+  filtered = rawData.filter(r =>
+    (!year || r.年度 === year) &&
+    (!teacher || fuzzyMatch(r.教師姓名, teacher)) &&
+    (!unit || r.單位 === unit) &&
+    (!project || fuzzyMatch(r.獎補助項目, project)) &&
+    (!keyword || (r.年度 + " " + r.教師姓名 + " " + r.單位 + " " + r.獎補助項目 + " " + r.備註).includes(keyword))
+  );
+
+  currentPage = 1;
+  render();
 }
+
 function render(){
-  let subtotal={}
+  const subtotal = Object.create(null);
   filtered.forEach(r=>{
-    let k=r.年度+r.教師姓名
-    subtotal[k]=(subtotal[k]||0)+r.核定經費
-  })
-  let start=(currentPage-1)*pageSize
-  let end=start+pageSize
-  let pageData=filtered.slice(start,end)
-  let shown={}
-  let tb=document.querySelector("#resultTable tbody")
-  tb.innerHTML=""
-  pageData.forEach((r,i)=>{
-    let k=r.年度+r.教師姓名
-    let sub=""
-    if(!shown[k]){sub=subtotal[k];shown[k]=true}
-    let tr=document.createElement("tr")
-    tr.innerHTML=`
-      <td class="c1">${start+i+1}</td>
-      <td class="c2">${r.年度}</td>
-      <td class="c3">${r.教師姓名}</td>
-      <td class="c4">${r.單位}</td>
-      <td class="c5 project">${r.獎補助項目}</td>
-      <td class="c6">${fmt(r.核定經費)}</td>
-      <td class="c7 ${sub>=400000?'warn':''}">${sub?fmt(sub):""}</td>
-      <td class="c8 note">${r.備註}</td>
-    `
-    tb.appendChild(tr)
-  })
-  document.getElementById("count").textContent=filtered.length
-  document.getElementById("sum").textContent=fmt(filtered.reduce((a,b)=>a+b.核定經費,0))
-  let warnCount=0
-  Object.values(subtotal).forEach(v=>{if(v>=400000)warnCount++})
-  document.getElementById("warnCount").textContent=warnCount
-  renderPagination()
-}
-function renderPagination(){
-  let totalPages=Math.ceil(filtered.length/pageSize)
-  let div=document.getElementById("pagination")
-  div.innerHTML=""
-  let prev=document.createElement("button")
-  prev.textContent="上一頁"
-  prev.onclick=function(){if(currentPage>1){currentPage--;render()}}
-  div.appendChild(prev)
-  for(let i=1;i<=totalPages;i++){
-    let btn=document.createElement("button")
-    btn.textContent=i
-    btn.onclick=function(){currentPage=i;render()}
-    div.appendChild(btn)
-  }
-  let next=document.createElement("button")
-  next.textContent="下一頁"
-  next.onclick=function(){if(currentPage<totalPages){currentPage++;render()}}
-  div.appendChild(next)
-}
-function resetSearch(){
-  document.getElementById("year").value=""
-  document.getElementById("teacher").value=""
-  document.getElementById("unit").value=""
-  document.getElementById("project").value=""
-  document.getElementById("keyword").value=""
-  search()
-}
-function exportExcel(){
-  let subtotal={}
-  let shown={}
-  filtered.forEach(r=>{
-    let k=r.年度+r.教師姓名
-    subtotal[k]=(subtotal[k]||0)+r.核定經費
-  })
-  let rows=filtered.map((r,i)=>{
-    let k=r.年度+r.教師姓名
-    let sub=""
-    if(!shown[k]){sub=subtotal[k];shown[k]=true}
-    return{
-      序號:i+1,年度:r.年度,教師姓名:r.教師姓名,單位:r.單位,獎補助項目:r.獎補助項目,
-      核定經費:fmt(r.核定經費),年度經費小計:sub?fmt(sub):"",備註:r.備註
+    const k = r.年度 + "___" + r.教師姓名;
+    subtotal[k] = (subtotal[k] || 0) + r.核定經費;
+  });
+
+  const start = (currentPage-1) * pageSize;
+  const pageData = filtered.slice(start, start + pageSize);
+
+  tbodyEl.innerHTML = "";
+  const shown = Object.create(null);
+
+  pageData.forEach((r, i)=>{
+    const k = r.年度 + "___" + r.教師姓名;
+    let sub = "";
+    if(!shown[k]){
+      sub = subtotal[k];
+      shown[k] = true;
     }
-  })
-  let ws=XLSX.utils.json_to_sheet(rows)
-  let wb=XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb,ws,"查詢結果")
-  XLSX.writeFile(wb,"教師獎補助查詢結果.xlsx")
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${start+i+1}</td>
+      <td>${r.年度}</td>
+      <td>${r.教師姓名}</td>
+      <td>${r.單位}</td>
+      <td class="project">${r.獎補助項目}</td>
+      <td>${fmt(r.核定經費)}</td>
+      <td class="${sub>=400000?'warn':''}">${sub ? fmt(sub) : ""}</td>
+      <td class="note">${r.備註}</td>
+    `;
+    tbodyEl.appendChild(tr);
+  });
+
+  if(pageData.length === 0){
+    tbodyEl.innerHTML = '<tr><td colspan="8">查無符合條件資料</td></tr>';
+  }
+
+  countEl.textContent = filtered.length.toLocaleString("zh-TW");
+  sumEl.textContent = fmt(filtered.reduce((a,b)=>a+b.核定經費,0));
+  let warn = 0;
+  Object.values(subtotal).forEach(v=>{ if(v >= 400000) warn++; });
+  warnCountEl.textContent = warn.toLocaleString("zh-TW");
+
+  renderPagination();
+  requestAnimationFrame(syncHeaderWidth);
 }
-document.addEventListener("DOMContentLoaded",loadServer)
+
+function renderPagination(){
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  paginationEl.innerHTML = "";
+  if(totalPages <= 1) return;
+
+  const prev = document.createElement("button");
+  prev.textContent = "上一頁";
+  prev.onclick = function(){ if(currentPage > 1){ currentPage--; render(); } };
+  paginationEl.appendChild(prev);
+
+  for(let i=1;i<=totalPages;i++){
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.onclick = function(){ currentPage = i; render(); };
+    paginationEl.appendChild(btn);
+  }
+
+  const next = document.createElement("button");
+  next.textContent = "下一頁";
+  next.onclick = function(){ if(currentPage < totalPages){ currentPage++; render(); } };
+  paginationEl.appendChild(next);
+}
+
+function resetSearch(){
+  yearEl.value = "";
+  teacherEl.value = "";
+  unitEl.value = "";
+  projectEl.value = "";
+  keywordEl.value = "";
+  search();
+}
+
+function reloadData(){
+  const p = prompt("請輸入重新載入資料密碼");
+  if(p === null) return;
+  if(p !== PASSWORD){
+    alert("密碼錯誤");
+    return;
+  }
+  uploadAreaEl.style.display = "block";
+}
+
+filePickerEl.addEventListener("change", function(){
+  const f = this.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+    const sh = wb.Sheets["資料表"] || wb.Sheets[wb.SheetNames[0]];
+    rawData = normalize(XLSX.utils.sheet_to_json(sh,{defval:""}));
+    buildCaches();
+    initDropdowns();
+    search();
+    setStatus("已從您選擇的 Excel 載入資料，共 " + rawData.length + " 筆。");
+    uploadAreaEl.style.display = "none";
+  };
+  reader.readAsArrayBuffer(f);
+});
+
+function exportExcel(){
+  const subtotal = Object.create(null);
+  const shown = Object.create(null);
+
+  filtered.forEach(r=>{
+    const k = r.年度 + "___" + r.教師姓名;
+    subtotal[k] = (subtotal[k] || 0) + r.核定經費;
+  });
+
+  const rows = filtered.map((r, i)=>{
+    const k = r.年度 + "___" + r.教師姓名;
+    let sub = "";
+    if(!shown[k]){
+      sub = subtotal[k];
+      shown[k] = true;
+    }
+    return {
+      序號: i+1,
+      年度: r.年度,
+      教師姓名: r.教師姓名,
+      單位: r.單位,
+      獎補助項目: r.獎補助項目,
+      核定經費: fmt(r.核定經費),
+      年度經費小計: sub ? fmt(sub) : "",
+      備註: r.備註
+    };
+  });
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "查詢結果");
+  XLSX.writeFile(wb, "教師獎補助查詢結果.xlsx");
+}
+
+window.addEventListener("resize", syncHeaderWidth);
+bodyWrapEl.addEventListener("scroll", function(){
+  headerWrapEl.scrollLeft = bodyWrapEl.scrollLeft;
+});
+
+document.addEventListener("DOMContentLoaded", loadServer);
 </script>
 </body>
 </html>
