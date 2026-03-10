@@ -230,7 +230,7 @@
         <option value="">全部年度</option>
       </select>
 
-      <input id="teacher" list="teacherList" placeholder="教師姓名（可輸入全名或遮罩姓名）">
+      <input id="teacher" list="teacherList" placeholder="教師姓名（可輸入全名）">
       <datalist id="teacherList"></datalist>
 
       <select id="unit">
@@ -252,10 +252,9 @@
 
     <div class="notice">※ 統計項目暫不包含「教師參加國內研習」</div>
     <div class="desc">
-      查詢結果中，教師姓名僅於畫面上遮罩顯示；匯出 Excel 仍為完整姓名。
-      「年度經費小計」僅於同一教師、同一年度、同一單位的第一筆顯示；達 400,000 以上會以紅字標示。
-      可用「年度經費小計下限 / 上限」查詢特定區間。若只輸入上限，系統會自動將下限視為 0。
-      同姓名但不同單位，系統會視為不同人。
+      查詢結果中，「年度經費小計」僅於教師同一年度的第一筆顯示；可用「年度經費小計下限 / 
+      上限」查詢特定區間，若只輸入上限，系統會自動將下限視為 0。年度經費小計達 400,000 
+      會以紅字標示。
     </div>
 
     <div class="status" id="status"></div>
