@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>教師獎補助查詢系統.v10</title>
+  <title>教師獎補助查詢系統 v10.1</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -379,7 +379,10 @@ function maskTeacherName(name){
   return name[0] + "○".repeat(name.length - 2) + name[name.length - 1];
 }
 
-// 姓名查詢強化：完整姓名、遮罩姓名、單字、部分字都可查
+// 修正版姓名查詢：
+// 1. 多字時，必須是連續字串比對
+// 2. 單一字時，允許單字查詢
+// 3. 支援完整姓名與遮罩姓名
 function teacherNameMatch(fullName, keyword){
   fullName = txt(fullName);
   keyword = txt(keyword);
@@ -387,13 +390,14 @@ function teacherNameMatch(fullName, keyword){
 
   const masked = maskTeacherName(fullName);
 
+  // 完整姓名直接包含
   if(fullName.includes(keyword)) return true;
+
+  // 遮罩姓名直接包含
   if(masked.includes(keyword)) return true;
 
-  // 單字或多字逐字檢查
-  for(const ch of keyword){
-    if(fullName.includes(ch)) return true;
-  }
+  // 只有單一字時，才允許單字查詢
+  if(keyword.length === 1 && fullName.includes(keyword)) return true;
 
   return false;
 }
@@ -415,7 +419,6 @@ function normalize(rows){
   }));
 }
 
-// 同姓名但不同單位，視為不同人
 function personKey(r){
   return r.年度 + "___" + r.教師姓名 + "___" + r.單位;
 }
