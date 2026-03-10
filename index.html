@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>教師獎補助查詢系統v9.8</title>
+  <title>教師獎補助查詢系統.v10</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -230,7 +230,7 @@
         <option value="">全部年度</option>
       </select>
 
-      <input id="teacher" list="teacherList" placeholder="教師姓名（可輸入全名）">
+      <input id="teacher" list="teacherList" placeholder="教師姓名（可模糊搜尋）">
       <datalist id="teacherList"></datalist>
 
       <select id="unit">
@@ -371,7 +371,6 @@ function setStatus(msg){
   statusEl.style.display = msg ? "block" : "none";
 }
 
-// 姓名遮罩：只影響畫面顯示，不影響計算與匯出
 function maskTeacherName(name){
   name = txt(name);
   if(name.length <= 1) return name;
@@ -380,14 +379,23 @@ function maskTeacherName(name){
   return name[0] + "○".repeat(name.length - 2) + name[name.length - 1];
 }
 
-// 查詢時支援完整姓名與遮罩姓名
+// 姓名查詢強化：完整姓名、遮罩姓名、單字、部分字都可查
 function teacherNameMatch(fullName, keyword){
   fullName = txt(fullName);
   keyword = txt(keyword);
   if(!keyword) return true;
 
   const masked = maskTeacherName(fullName);
-  return fullName.includes(keyword) || masked.includes(keyword);
+
+  if(fullName.includes(keyword)) return true;
+  if(masked.includes(keyword)) return true;
+
+  // 單字或多字逐字檢查
+  for(const ch of keyword){
+    if(fullName.includes(ch)) return true;
+  }
+
+  return false;
 }
 
 function syncHeaderWidth(){
@@ -473,7 +481,6 @@ function searchData(){
   let subtotalMin = subtotalMinEl.value === "" ? null : Number(subtotalMinEl.value);
   let subtotalMax = subtotalMaxEl.value === "" ? null : Number(subtotalMaxEl.value);
 
-  // 只輸入上限時，下限自動視為 0
   if(subtotalMin === null && subtotalMax !== null){
     subtotalMin = 0;
   }
@@ -675,7 +682,7 @@ function exportExcel(){
     return {
       序號: i + 1,
       年度: r.年度,
-      教師姓名: r.教師姓名, // 匯出保留完整姓名
+      教師姓名: r.教師姓名,
       單位: r.單位,
       獎補助項目: r.獎補助項目,
       核定經費: fmt(r.核定經費),
