@@ -1,47 +1,224 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>教師獎補助查詢系統 v9.2</title>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<style>
-body{font-family:Arial,"Microsoft JhengHei",sans-serif;margin:0;background:#f4f6fb;color:#243447}
-.wrap{max-width:1400px;margin:auto;padding:20px}
-h1{color:#123a75;margin:0 0 14px}
-.panel{background:#fff;border:1px solid #d9e2ef;border-radius:10px;padding:14px;margin-bottom:12px}
-.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.controls input,.controls select{padding:8px;border:1px solid #cfd9e8;border-radius:6px;width:100%;box-sizing:border-box}
-.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-button{padding:8px 14px;border:none;border-radius:6px;background:#2c6ed5;color:#fff;cursor:pointer}
-button.secondary{background:#6c7a89}
-button.ghost{background:#eef4ff;color:#1d4ea7}
-.notice{margin:6px 0;font-size:15px;font-weight:700;color:#1a3d7a}
-.desc{font-size:13px;color:#4b5b6b}
-.status{margin-top:10px;padding:9px 12px;border-radius:8px;background:#f8fbff;border:1px solid #d7e4ff;color:#153d7a;font-size:13px;display:none}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-.stat{background:#edf3ff;border:1px solid #d7e4ff;border-radius:10px;padding:12px}
-.stat .k{font-size:12px;color:#5c6b7a}
-.stat .v{font-size:24px;font-weight:700;color:#153d7a;margin-top:4px}
-.table-shell{border:1px solid #d9e2ef;background:#fff;border-radius:10px;overflow:hidden}
-.header-wrap{overflow:hidden}
-.body-wrap{max-height:520px;overflow-y:auto;overflow-x:hidden}
-.header-table,.body-table{width:100%;border-collapse:collapse;table-layout:fixed}
-.header-table th{background:#e8f0ff;color:#143a74;border:1px solid #d9e2ef;padding:12px 6px;font-size:13px;text-align:center;vertical-align:middle}
-.body-table td{border:1px solid #d9e2ef;padding:6px;font-size:13px;text-align:center;vertical-align:middle;background:#fff}
-.body-table td.note{white-space:normal;text-align:left}
-.body-table td.project{white-space:normal}
-.warn{color:#c62828;font-weight:bold}
-.pagination{margin-top:10px;text-align:center}
-.pagination button{margin:2px;background:#eef4ff;color:#1d4ea7}
-.upload-area{display:none;margin-top:10px;padding:12px;border:1px dashed #9db7e6;border-radius:8px;background:#f8fbff}
-.col1{width:6%}.col2{width:8%}.col3{width:12%}.col4{width:16%}.col5{width:18%}.col6{width:10%}.col7{width:12%}.col8{width:18%}
-@media (max-width:1100px){.controls{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:700px){.controls{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:1fr}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教師獎補助查詢系統 v9.6 版</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    body{
+      font-family:Arial,"Microsoft JhengHei",sans-serif;
+      margin:0;
+      background:#f4f6fb;
+      color:#243447;
+    }
+    .wrap{
+      max-width:1400px;
+      margin:auto;
+      padding:20px;
+    }
+    h1{
+      color:#123a75;
+      margin:0 0 14px;
+    }
+    .panel{
+      background:#fff;
+      border:1px solid #d9e2ef;
+      border-radius:10px;
+      padding:14px;
+      margin-bottom:12px;
+    }
+    .controls{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:10px;
+    }
+    .controls input,.controls select{
+      padding:8px;
+      border:1px solid #cfd9e8;
+      border-radius:6px;
+      width:100%;
+      box-sizing:border-box;
+      font-size:14px;
+    }
+    .btns{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    button{
+      padding:8px 14px;
+      border:none;
+      border-radius:6px;
+      background:#2c6ed5;
+      color:#fff;
+      cursor:pointer;
+      font-size:14px;
+    }
+    button.secondary{background:#6c7a89;}
+    button.ghost{background:#eef4ff;color:#1d4ea7;}
+    .notice{
+      margin:6px 0;
+      font-size:15px;
+      font-weight:700;
+      color:#1a3d7a;
+    }
+    .desc{
+      font-size:13px;
+      color:#4b5b6b;
+      line-height:1.6;
+    }
+    .status{
+      margin-top:10px;
+      padding:9px 12px;
+      border-radius:8px;
+      background:#f8fbff;
+      border:1px solid #d7e4ff;
+      color:#153d7a;
+      font-size:13px;
+      display:none;
+    }
+    .upload-area{
+      display:none;
+      margin-top:10px;
+      padding:12px;
+      border:1px dashed #9db7e6;
+      border-radius:8px;
+      background:#f8fbff;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .stat{
+      background:#edf3ff;
+      border:1px solid #d7e4ff;
+      border-radius:10px;
+      padding:12px;
+    }
+    .stat .k{
+      font-size:12px;
+      color:#5c6b7a;
+    }
+    .stat .v{
+      font-size:24px;
+      font-weight:700;
+      color:#153d7a;
+      margin-top:4px;
+    }
+
+    .summary-box{
+      background:#fff;
+      border:1px solid #d9e2ef;
+      border-radius:10px;
+      padding:12px;
+      margin-bottom:12px;
+      display:none;
+    }
+    .summary-title{
+      font-weight:700;
+      color:#123a75;
+      margin-bottom:8px;
+    }
+    .summary-list{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .summary-item{
+      background:#eef4ff;
+      border:1px solid #d7e4ff;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:13px;
+      color:#153d7a;
+    }
+
+    .table-shell{
+      border:1px solid #d9e2ef;
+      background:#fff;
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .header-wrap{
+      overflow:hidden;
+    }
+    .body-wrap{
+      max-height:520px;
+      overflow-y:auto;
+      overflow-x:hidden;
+    }
+    .header-table,.body-table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+    }
+    .header-table th{
+      background:#e8f0ff;
+      color:#143a74;
+      border:1px solid #d9e2ef;
+      padding:12px 6px;
+      font-size:13px;
+      text-align:center;
+      vertical-align:middle;
+    }
+    .body-table td{
+      border:1px solid #d9e2ef;
+      padding:6px;
+      font-size:13px;
+      text-align:center;
+      vertical-align:middle;
+      background:#fff;
+    }
+    .body-table td.note{
+      white-space:normal;
+      text-align:left;
+      line-height:1.5;
+    }
+    .body-table td.project{
+      white-space:normal;
+      line-height:1.5;
+    }
+    .warn{
+      color:#c62828;
+      font-weight:bold;
+    }
+
+    .pagination{
+      margin-top:10px;
+      text-align:center;
+    }
+    .pagination button{
+      margin:2px;
+      background:#eef4ff;
+      color:#1d4ea7;
+    }
+
+    .col1{width:6%}
+    .col2{width:8%}
+    .col3{width:12%}
+    .col4{width:16%}
+    .col5{width:18%}
+    .col6{width:10%}
+    .col7{width:12%}
+    .col8{width:18%}
+
+    @media (max-width:1100px){
+      .controls{grid-template-columns:repeat(3,1fr)}
+      .stats{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:700px){
+      .controls{grid-template-columns:repeat(2,1fr)}
+      .stats{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 <body>
 <div class="wrap">
@@ -49,35 +226,67 @@ button.ghost{background:#eef4ff;color:#1d4ea7}
 
   <div class="panel">
     <div class="controls">
-      <select id="year"><option value="">全部年度</option></select>
+      <select id="year">
+        <option value="">全部年度</option>
+      </select>
+
       <input id="teacher" list="teacherList" placeholder="教師姓名（可模糊搜尋）">
       <datalist id="teacherList"></datalist>
-      <select id="unit"><option value="">全部單位</option></select>
+
+      <select id="unit">
+        <option value="">全部單位</option>
+      </select>
+
       <input id="project" placeholder="獎補助項目">
       <input id="keyword" placeholder="關鍵字">
+      <input id="subtotalMin" type="number" min="0" step="1" placeholder="年度經費小計下限">
+      <input id="subtotalMax" type="number" min="0" step="1" placeholder="年度經費小計上限">
     </div>
 
     <div class="btns">
-      <button onclick="search()">查詢</button>
+      <button onclick="searchData()">查詢</button>
       <button class="secondary" onclick="resetSearch()">清除條件</button>
       <button class="ghost" onclick="exportExcel()">匯出 Excel</button>
       <button class="ghost" onclick="reloadData()">重新載入資料</button>
     </div>
 
     <div class="notice">※ 統計項目暫不包含「教師參加國內研習」</div>
-    <div class="desc">查詢結果中，「年度經費小計」僅於同一教師同一年度的第一筆顯示；達 400,000 以上會以紅字標示。</div>
+    <div class="desc">
+      查詢結果中，「年度經費小計」僅於同一教師同一年度的第一筆顯示；達 400,000 以上會以紅字標示。
+      可用「年度經費小計下限 / 上限」查詢特定區間，例如輸入下限 200000 查達 200,000 的教師名單。
+      若只輸入上限，系統會自動將下限視為 0。
+    </div>
+
     <div class="status" id="status"></div>
 
     <div class="upload-area" id="uploadArea">
-      <div style="font-weight:700;margin-bottom:6px">請選擇 Excel 資料表</div>
+      <div style="font-weight:700;margin-bottom:6px;">請選擇 Excel 資料表</div>
       <input type="file" id="filePicker" accept=".xlsx">
     </div>
   </div>
 
   <div class="stats">
-    <div class="stat"><div class="k">查詢筆數</div><div class="v" id="count">0</div></div>
-    <div class="stat"><div class="k">核定經費總計</div><div class="v" id="sum">0</div></div>
-    <div class="stat"><div class="k">超過 400,000 之教師年度組數</div><div class="v" id="warnCount">0</div></div>
+    <div class="stat">
+      <div class="k">查詢筆數</div>
+      <div class="v" id="count">0</div>
+    </div>
+    <div class="stat">
+      <div class="k">核定經費總計</div>
+      <div class="v" id="sum">0</div>
+    </div>
+    <div class="stat">
+      <div class="k">超過 400,000 之教師年度組數</div>
+      <div class="v" id="warnCount">0</div>
+    </div>
+    <div class="stat">
+      <div class="k">符合小計區間之教師人數</div>
+      <div class="v" id="teacherCount">0</div>
+    </div>
+  </div>
+
+  <div class="summary-box" id="summaryBox">
+    <div class="summary-title">符合條件的教師名單摘要</div>
+    <div class="summary-list" id="teacherSummary"></div>
   </div>
 
   <div class="table-shell">
@@ -89,12 +298,19 @@ button.ghost{background:#eef4ff;color:#1d4ea7}
         </colgroup>
         <thead>
           <tr>
-            <th>序號</th><th>年度</th><th>教師姓名</th><th>單位</th>
-            <th>獎補助項目</th><th>核定經費</th><th>年度經費小計</th><th>備註</th>
+            <th>序號</th>
+            <th>年度</th>
+            <th>教師姓名</th>
+            <th>單位</th>
+            <th>獎補助項目</th>
+            <th>核定經費</th>
+            <th>年度經費小計</th>
+            <th>備註</th>
           </tr>
         </thead>
       </table>
     </div>
+
     <div class="body-wrap" id="bodyWrap">
       <table class="body-table" id="resultTable">
         <colgroup>
@@ -121,10 +337,17 @@ const teacherEl = document.getElementById("teacher");
 const unitEl = document.getElementById("unit");
 const projectEl = document.getElementById("project");
 const keywordEl = document.getElementById("keyword");
+const subtotalMinEl = document.getElementById("subtotalMin");
+const subtotalMaxEl = document.getElementById("subtotalMax");
+
 const teacherListEl = document.getElementById("teacherList");
 const countEl = document.getElementById("count");
 const sumEl = document.getElementById("sum");
 const warnCountEl = document.getElementById("warnCount");
+const teacherCountEl = document.getElementById("teacherCount");
+const teacherSummaryEl = document.getElementById("teacherSummary");
+const summaryBoxEl = document.getElementById("summaryBox");
+
 const paginationEl = document.getElementById("pagination");
 const tbodyEl = document.querySelector("#resultTable tbody");
 const statusEl = document.getElementById("status");
@@ -135,8 +358,14 @@ const headerWrapEl = document.getElementById("headerWrap");
 const headerTableEl = document.getElementById("headerTable");
 const resultTableEl = document.getElementById("resultTable");
 
-function fmt(n){ return Number(n||0).toLocaleString("zh-TW"); }
-function txt(v){ return (v ?? "").toString().trim(); }
+function fmt(n){
+  return Number(n || 0).toLocaleString("zh-TW");
+}
+
+function txt(v){
+  return (v ?? "").toString().trim();
+}
+
 function setStatus(msg){
   statusEl.textContent = msg || "";
   statusEl.style.display = msg ? "block" : "none";
@@ -162,15 +391,17 @@ function normalize(rows){
 async function loadServer(){
   try{
     setStatus("");
-    const res = await fetch("data.xlsx?v=" + Date.now(), {cache:"no-store"});
+    const res = await fetch("data.xlsx?v=" + Date.now(), { cache: "no-store" });
     if(!res.ok) throw new Error("load failed");
+
     const buf = await res.arrayBuffer();
-    const wb = XLSX.read(buf,{type:"array"});
+    const wb = XLSX.read(buf, { type: "array" });
     const sh = wb.Sheets["資料表"] || wb.Sheets[wb.SheetNames[0]];
-    rawData = normalize(XLSX.utils.sheet_to_json(sh,{defval:""}));
+    rawData = normalize(XLSX.utils.sheet_to_json(sh, { defval: "" }));
+
     buildCaches();
     initDropdowns();
-    search();
+    searchData();
     uploadAreaEl.style.display = "none";
   }catch(e){
     setStatus("");
@@ -178,31 +409,52 @@ async function loadServer(){
 }
 
 function buildCaches(){
-  const names = [...new Set(rawData.map(r => r.教師姓名).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+  const names = [...new Set(rawData.map(r => r.教師姓名).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b, "zh-Hant"));
+
   teacherListEl.innerHTML = names.map(n => `<option value="${n}"></option>`).join("");
 }
 
 function initDropdowns(){
-  const years = [...new Set(rawData.map(r=>r.年度).filter(Boolean))].sort((a,b)=>Number(b)-Number(a));
-  const units = [...new Set(rawData.map(r=>r.單位).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+  const years = [...new Set(rawData.map(r=>r.年度).filter(Boolean))]
+    .sort((a,b)=>Number(b)-Number(a));
+
+  const units = [...new Set(rawData.map(r=>r.單位).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b, "zh-Hant"));
+
   const curYear = yearEl.value;
   const curUnit = unitEl.value;
-  yearEl.innerHTML = '<option value="">全部年度</option>' + years.map(v=>`<option value="${v}">${v}</option>`).join("");
-  unitEl.innerHTML = '<option value="">全部單位</option>' + units.map(v=>`<option value="${v}">${v}</option>`).join("");
+
+  yearEl.innerHTML = '<option value="">全部年度</option>' +
+    years.map(v=>`<option value="${v}">${v}</option>`).join("");
+
+  unitEl.innerHTML = '<option value="">全部單位</option>' +
+    units.map(v=>`<option value="${v}">${v}</option>`).join("");
+
   if(years.includes(curYear)) yearEl.value = curYear;
   if(units.includes(curUnit)) unitEl.value = curUnit;
 }
 
-function fuzzyMatch(t,k){ return t.toLowerCase().includes(k.toLowerCase()); }
+function fuzzyMatch(text, keyword){
+  return text.toLowerCase().includes(keyword.toLowerCase());
+}
 
-function search(){
+function searchData(){
   const year = yearEl.value;
   const teacher = txt(teacherEl.value);
   const unit = unitEl.value;
   const project = txt(projectEl.value);
   const keyword = txt(keywordEl.value);
 
-  filtered = rawData.filter(r =>
+  let subtotalMin = subtotalMinEl.value === "" ? null : Number(subtotalMinEl.value);
+  let subtotalMax = subtotalMaxEl.value === "" ? null : Number(subtotalMaxEl.value);
+
+  // 只輸入上限時，下限自動視為 0
+  if(subtotalMin === null && subtotalMax !== null){
+    subtotalMin = 0;
+  }
+
+  const baseFiltered = rawData.filter(r =>
     (!year || r.年度 === year) &&
     (!teacher || fuzzyMatch(r.教師姓名, teacher)) &&
     (!unit || r.單位 === unit) &&
@@ -210,18 +462,55 @@ function search(){
     (!keyword || (r.年度 + " " + r.教師姓名 + " " + r.單位 + " " + r.獎補助項目 + " " + r.備註).includes(keyword))
   );
 
+  const subtotalMap = Object.create(null);
+  baseFiltered.forEach(r=>{
+    const k = r.年度 + "___" + r.教師姓名;
+    subtotalMap[k] = (subtotalMap[k] || 0) + r.核定經費;
+  });
+
+  filtered = baseFiltered.filter(r=>{
+    const k = r.年度 + "___" + r.教師姓名;
+    const subtotal = subtotalMap[k] || 0;
+    const minOk = subtotalMin === null || subtotal >= subtotalMin;
+    const maxOk = subtotalMax === null || subtotal <= subtotalMax;
+    return minOk && maxOk;
+  });
+
   currentPage = 1;
-  render();
+  render(subtotalMin, subtotalMax);
 }
 
-function render(){
+function render(subtotalMin, subtotalMax){
   const subtotal = Object.create(null);
   filtered.forEach(r=>{
     const k = r.年度 + "___" + r.教師姓名;
     subtotal[k] = (subtotal[k] || 0) + r.核定經費;
   });
 
-  const start = (currentPage-1) * pageSize;
+  const summaryRows = Object.keys(subtotal).map(k => {
+    const parts = k.split("___");
+    return {
+      年度: parts[0],
+      教師姓名: parts[1],
+      小計: subtotal[k]
+    };
+  }).sort((a,b)=>{
+    if(a.年度 !== b.年度) return Number(b.年度) - Number(a.年度);
+    return b.小計 - a.小計;
+  });
+
+  // 只要有輸入下限或上限，就顯示摘要區塊
+  if(subtotalMin === null && subtotalMax === null){
+    summaryBoxEl.style.display = "none";
+    teacherSummaryEl.innerHTML = "";
+  }else{
+    summaryBoxEl.style.display = "block";
+    teacherSummaryEl.innerHTML = summaryRows.length
+      ? summaryRows.map(r => `<span class="summary-item">${r.年度}｜${r.教師姓名}｜${fmt(r.小計)}</span>`).join("")
+      : '<span class="summary-item">目前沒有符合條件的教師</span>';
+  }
+
+  const start = (currentPage - 1) * pageSize;
   const pageData = filtered.slice(start, start + pageSize);
 
   tbodyEl.innerHTML = "";
@@ -237,13 +526,13 @@ function render(){
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${start+i+1}</td>
+      <td>${start + i + 1}</td>
       <td>${r.年度}</td>
       <td>${r.教師姓名}</td>
       <td>${r.單位}</td>
       <td class="project">${r.獎補助項目}</td>
       <td>${fmt(r.核定經費)}</td>
-      <td class="${sub>=400000?'warn':''}">${sub ? fmt(sub) : ""}</td>
+      <td class="${sub >= 400000 ? 'warn' : ''}">${sub ? fmt(sub) : ""}</td>
       <td class="note">${r.備註}</td>
     `;
     tbodyEl.appendChild(tr);
@@ -254,35 +543,52 @@ function render(){
   }
 
   countEl.textContent = filtered.length.toLocaleString("zh-TW");
-  sumEl.textContent = fmt(filtered.reduce((a,b)=>a+b.核定經費,0));
-  let warn = 0;
-  Object.values(subtotal).forEach(v=>{ if(v >= 400000) warn++; });
-  warnCountEl.textContent = warn.toLocaleString("zh-TW");
+  sumEl.textContent = fmt(filtered.reduce((a,b)=>a+b.核定經費, 0));
 
-  renderPagination();
+  let warn = 0;
+  Object.values(subtotal).forEach(v=>{
+    if(v >= 400000) warn++;
+  });
+  warnCountEl.textContent = warn.toLocaleString("zh-TW");
+  teacherCountEl.textContent = summaryRows.length.toLocaleString("zh-TW");
+
+  renderPagination(subtotalMin, subtotalMax);
   requestAnimationFrame(syncHeaderWidth);
 }
 
-function renderPagination(){
+function renderPagination(subtotalMin, subtotalMax){
   const totalPages = Math.ceil(filtered.length / pageSize);
   paginationEl.innerHTML = "";
   if(totalPages <= 1) return;
 
   const prev = document.createElement("button");
   prev.textContent = "上一頁";
-  prev.onclick = function(){ if(currentPage > 1){ currentPage--; render(); } };
+  prev.onclick = function(){
+    if(currentPage > 1){
+      currentPage--;
+      render(subtotalMin, subtotalMax);
+    }
+  };
   paginationEl.appendChild(prev);
 
   for(let i=1;i<=totalPages;i++){
     const btn = document.createElement("button");
     btn.textContent = i;
-    btn.onclick = function(){ currentPage = i; render(); };
+    btn.onclick = function(){
+      currentPage = i;
+      render(subtotalMin, subtotalMax);
+    };
     paginationEl.appendChild(btn);
   }
 
   const next = document.createElement("button");
   next.textContent = "下一頁";
-  next.onclick = function(){ if(currentPage < totalPages){ currentPage++; render(); } };
+  next.onclick = function(){
+    if(currentPage < totalPages){
+      currentPage++;
+      render(subtotalMin, subtotalMax);
+    }
+  };
   paginationEl.appendChild(next);
 }
 
@@ -292,7 +598,9 @@ function resetSearch(){
   unitEl.value = "";
   projectEl.value = "";
   keywordEl.value = "";
-  search();
+  subtotalMinEl.value = "";
+  subtotalMaxEl.value = "";
+  searchData();
 }
 
 function reloadData(){
@@ -308,14 +616,15 @@ function reloadData(){
 filePickerEl.addEventListener("change", function(){
   const f = this.files[0];
   if(!f) return;
+
   const reader = new FileReader();
   reader.onload = function(ev){
-    const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+    const wb = XLSX.read(new Uint8Array(ev.target.result), { type: "array" });
     const sh = wb.Sheets["資料表"] || wb.Sheets[wb.SheetNames[0]];
-    rawData = normalize(XLSX.utils.sheet_to_json(sh,{defval:""}));
+    rawData = normalize(XLSX.utils.sheet_to_json(sh, { defval: "" }));
     buildCaches();
     initDropdowns();
-    search();
+    searchData();
     setStatus("");
     uploadAreaEl.style.display = "none";
   };
@@ -338,8 +647,9 @@ function exportExcel(){
       sub = subtotal[k];
       shown[k] = true;
     }
+
     return {
-      序號: i+1,
+      序號: i + 1,
       年度: r.年度,
       教師姓名: r.教師姓名,
       單位: r.單位,
