@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>教師獎補助查詢系統 v10.1</title>
+  <title>教師獎補助查詢系統v10.2</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -239,8 +239,8 @@
 
       <input id="project" placeholder="獎補助項目">
       <input id="keyword" placeholder="關鍵字">
-      <input id="subtotalMin" type="number" min="0" step="1" placeholder="年度經費小計(查詢區間下限)">
-      <input id="subtotalMax" type="number" min="0" step="1" placeholder="年度經費小計(查詢區間上限)">
+      <input id="subtotalMin" type="number" min="0" step="1" placeholder="年度經費小計(查詢經費下限)">
+      <input id="subtotalMax" type="number" min="0" step="1" placeholder="年度經費小計(查詢經費上限)">
     </div>
 
     <div class="btns">
@@ -252,9 +252,8 @@
 
     <div class="notice">※ 統計項目暫不包含「教師參加國內研習」</div>
     <div class="desc">
-      查詢結果中，「年度經費小計」僅於教師同一年度的第一筆顯示；可用「年度經費小計下限 / 
-      上限」查詢特定區間，若只輸入區間上限，系統會自動將下限視為0。年度經費小計達400,000
-      會以紅字標示。
+      查詢結果中，「年度經費小計」僅於教師同一年度的第一筆顯示；可用「年度經費小計下限 / 上限」
+      查詢特定區間，若只輸入區間上限，系統會自動將下限視為0。年度經費小計達400,000 會以紅字標示。
     </div>
 
     <div class="status" id="status"></div>
@@ -330,6 +329,7 @@ let rawData = [];
 let filtered = [];
 let pageSize = 20;
 let currentPage = 1;
+let hasSearched = false;
 const PASSWORD = "admin123";
 
 const yearEl = document.getElementById("year");
@@ -379,10 +379,6 @@ function maskTeacherName(name){
   return name[0] + "○".repeat(name.length - 2) + name[name.length - 1];
 }
 
-// 修正版姓名查詢：
-// 1. 多字時，必須是連續字串比對
-// 2. 單一字時，允許單字查詢
-// 3. 支援完整姓名與遮罩姓名
 function teacherNameMatch(fullName, keyword){
   fullName = txt(fullName);
   keyword = txt(keyword);
@@ -390,13 +386,8 @@ function teacherNameMatch(fullName, keyword){
 
   const masked = maskTeacherName(fullName);
 
-  // 完整姓名直接包含
   if(fullName.includes(keyword)) return true;
-
-  // 遮罩姓名直接包含
   if(masked.includes(keyword)) return true;
-
-  // 只有單一字時，才允許單字查詢
   if(keyword.length === 1 && fullName.includes(keyword)) return true;
 
   return false;
@@ -436,10 +427,15 @@ async function loadServer(){
 
     buildCaches();
     initDropdowns();
-    searchData();
+    filtered = [];
+    hasSearched = false;
+    render(null, null);
     uploadAreaEl.style.display = "none";
   }catch(e){
     setStatus("");
+    filtered = [];
+    hasSearched = false;
+    render(null, null);
   }
 }
 
@@ -511,10 +507,24 @@ function searchData(){
   });
 
   currentPage = 1;
+  hasSearched = true;
   render(subtotalMin, subtotalMax);
 }
 
 function render(subtotalMin, subtotalMax){
+  if(!hasSearched){
+    tbodyEl.innerHTML = '<tr><td colspan="8">請先輸入條件後按「查詢」</td></tr>';
+    countEl.textContent = "0";
+    sumEl.textContent = "0";
+    warnCountEl.textContent = "0";
+    teacherCountEl.textContent = "0";
+    summaryBoxEl.style.display = "none";
+    teacherSummaryEl.innerHTML = "";
+    paginationEl.innerHTML = "";
+    requestAnimationFrame(syncHeaderWidth);
+    return;
+  }
+
   const subtotal = Object.create(null);
   filtered.forEach(r=>{
     const k = personKey(r);
@@ -634,7 +644,9 @@ function resetSearch(){
   keywordEl.value = "";
   subtotalMinEl.value = "";
   subtotalMaxEl.value = "";
-  searchData();
+  filtered = [];
+  hasSearched = false;
+  render(null, null);
 }
 
 function reloadData(){
@@ -658,7 +670,9 @@ filePickerEl.addEventListener("change", function(){
     rawData = normalize(XLSX.utils.sheet_to_json(sh, { defval: "" }));
     buildCaches();
     initDropdowns();
-    searchData();
+    filtered = [];
+    hasSearched = false;
+    render(null, null);
     setStatus("");
     uploadAreaEl.style.display = "none";
   };
@@ -666,6 +680,11 @@ filePickerEl.addEventListener("change", function(){
 });
 
 function exportExcel(){
+  if(!hasSearched || filtered.length === 0){
+    alert("目前沒有可匯出的查詢結果");
+    return;
+  }
+
   const subtotal = Object.create(null);
   const shown = Object.create(null);
 
