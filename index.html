@@ -412,13 +412,43 @@ function syncHeaderWidth(){
   headerTableEl.style.width = resultTableEl.getBoundingClientRect().width + "px";
 }
 
+function safeMoney(value){
+
+  if(value === null || value === undefined)
+    return 0;
+
+  let v = String(value).trim();
+
+  if(
+    v === "" ||
+    v === "-" ||
+    v === "--" ||
+    v.toUpperCase() === "N/A"
+  ){
+    return 0;
+  }
+
+  v = v
+    .replace(/,/g,"")
+    .replace(/元/g,"")
+    .replace(/\$/g,"")
+    .replace(/＄/g,"")
+    .trim();
+
+  const num = Number(v);
+
+  return Number.isFinite(num)
+    ? num
+    : 0;
+}
+
 function normalize(rows){
   return rows.map(r => ({
     年度: txt(r["年度"]),
     教師姓名: txt(r["教師姓名"]),
     單位: txt(r["單位"]),
     獎補助項目: txt(r["獎補助項目"]),
-    核定經費: Number(r["核定經費"] || 0),
+    核定經費: safeMoney(r["核定經費"]),
     會議通過核定: txt(r["會議通過(核定)"]),
     備註: txt(r["備註"])
   }));
